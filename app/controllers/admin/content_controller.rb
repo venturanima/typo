@@ -5,7 +5,20 @@ class Admin::ContentController < Admin::BaseController
   layout "administration", :except => [:show, :autosave]
 
   cache_sweeper :blog_sweeper
-
+  
+  def merge_with
+	@article = Article.find_by_id(params[:id])
+	articleToMerge = Article.find_by_id(params[:merge_with])
+	if @article and articleToMerge
+		@article.merge_with(params[:merge_with])
+		redirect_to :action => 'index'
+		flash[:notice] = _("Articles #{params[:id]} and #{params[:merge_with]} were merged.")
+	else
+		redirect_to :action => 'index'
+		flash[:notice] = _("Article id #{params[:merge_with]} does not exist.")
+    end
+  end
+  
   def auto_complete_for_article_keywords
     @items = Tag.find_with_char params[:article][:keywords].strip
     render :inline => "<%= raw auto_complete_result @items, 'name' %>"
