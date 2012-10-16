@@ -43,6 +43,24 @@ Given /^the blog is set up$/ do
                 :state => 'active'})
 end
 
+Given /^I am logged into a non-admin with id (.+)$/ do |id|
+  User.create!({:login => 'regular',
+                :password => 'aaaaaaaa',
+                :email => 'regular@joe.com',
+                :profile_id => id,
+                :name => 'regular',
+                :state => 'active'})
+  visit '/accounts/login'
+  fill_in 'user_login', :with => 'regular'
+  fill_in 'user_password', :with => 'aaaaaaaa'
+  click_button 'Login'
+  if page.respond_to? :should
+    page.should have_content('Login successful')
+  else
+    assert page.has_content?('Login successful')
+  end
+end
+
 And /^I am logged into the admin panel$/ do
   visit '/accounts/login'
   fill_in 'user_login', :with => 'admin'
@@ -53,6 +71,21 @@ And /^I am logged into the admin panel$/ do
   else
     assert page.has_content?('Login successful')
   end
+end
+
+Given /^an article called "(.+)" and body "(.+)"$/ do |title, body|
+  visit '/admin/content/new'
+  fill_in 'article_title', :with => title
+  fill_in 'article__body_and_extended_editor', :with => body
+  click_button 'Publish'
+  @article_id = Article.find_by_title(title).id
+end
+
+When /^I merge "(.+)" and "(.+)"$/ do |title1, title2|
+	article1 = Article.find_by_title(title1)
+	article2 = Article.find_by_title(title2)
+	fill_in 'merge_with', :with => article2.id
+	click_button 'Merge'
 end
 
 # Single-line step scoper

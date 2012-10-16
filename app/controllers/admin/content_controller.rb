@@ -9,14 +9,19 @@ class Admin::ContentController < Admin::BaseController
   def merge_with
 	@article = Article.find_by_id(params[:id])
 	articleToMerge = Article.find_by_id(params[:merge_with])
-	if @article and articleToMerge
-		@article.merge_with(params[:merge_with])
-		redirect_to :action => 'index'
-		flash[:notice] = _("Articles #{params[:id]} and #{params[:merge_with]} were merged.")
+	if not User.find_by_id(session[:user_id]).admin?
+			redirect_to :action => 'index'
+			flash[:notice] = _("You are not allowed to do that.")
 	else
-		redirect_to :action => 'index'
-		flash[:notice] = _("Article id #{params[:merge_with]} does not exist.")
-    end
+		if @article and articleToMerge
+			@article.merge_with(params[:merge_with])
+			redirect_to :action => 'index'
+			flash[:notice] = _("Articles were merged.")
+		else
+			redirect_to :action => 'index'
+			flash[:notice] = _("Article id #{params[:merge_with]} does not exist.")
+		end
+	end
   end
   
   def auto_complete_for_article_keywords

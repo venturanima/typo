@@ -78,6 +78,9 @@ class Article < Content
 		return nil
 	else
 		self.body = self.body + "\n" + articleToMerge.body
+		Comment.find_all_by_article_id(article_id).each do |comment|
+			self.comments << comment
+		end
 		self.save
 		articleToMerge.delete
 	end
